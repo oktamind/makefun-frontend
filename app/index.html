@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="A fast, read-only frontend for make.fun: live bounty board, bounty pages, leaderboards and public profiles, straight from make.fun's public API.">
+<title>make.fun bounties</title>
+<link rel="stylesheet" href="style.css">
+<script type="module" src="main.js"></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#/">make.fun <span>bounties</span></a>
+  <nav aria-label="Sections">
+    <a href="#/">Board</a>
+    <a href="#/bounty/makefun-frontend-01">This bounty</a>
+  </nav>
+  <form id="profile-search" class="profile-search" role="search">
+    <label class="sr-only" for="handle-input">Find a profile</label>
+    <input id="handle-input" name="handle" type="search" placeholder="@handle — find a profile" autocomplete="off" spellcheck="false">
+    <button type="submit">Go</button>
+  </form>
+</header>
+<main id="app" aria-live="polite"><p class="loading">Loading live data from make.fun…</p></main>
+<footer>
+  <p>Read-only: no sign-in, no writes. Data: <a href="https://make.fun/api/openapi.json">make.fun public API</a> · <a href="https://make.fun/llms.txt">docs</a>. Pots, fees and time left are live — a bounty past its deadline takes no entries even while its status still reads open.</p>
+</footer>
+<noscript><p class="loading">This frontend needs JavaScript: it renders live make.fun data in your browser.</p></noscript>
+</body>
+</html>
