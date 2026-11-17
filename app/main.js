@@ -6,9 +6,11 @@
 // The header stays put; only #app is re-rendered, so switching views never
 // rebuilds the page. window.__shotReady is false while a view loads and true
 // once its live data is on screen, so a screenshot script knows when to capture.
+// The leaderboard and profile views live in views-extra.js and are imported
+// on demand, so the board's first load carries only board + bounty code.
 
 import { cacheSize, dropCached, getBounties, getBounty, getLeaderboard, getProfile } from './api.js';
-import { board, bounty, leaderboard, profile } from './views.js';
+import { board, bounty } from './views.js';
 
 const app = document.getElementById('app');
 
@@ -24,9 +26,9 @@ function errorView(message) {
 function route() {
   const hash = location.hash || '#/';
   const bountyMatch = hash.match(/^#\/bounty\/([^/]+)(?:\/leaderboard)?$/);
-  const boardMatch = hash.match(/^#\/bounty\/([^/]+)\/leaderboard$/);
+  const leaderboardMatch = hash.match(/^#\/bounty\/([^/]+)\/leaderboard$/);
   const profileMatch = hash.match(/^#\/u\/([^/]+)$/);
-  if (boardMatch) return { view: 'leaderboard', slug: decodeURIComponent(boardMatch[1]) };
+  if (leaderboardMatch) return { view: 'leaderboard', slug: decodeURIComponent(leaderboardMatch[1]) };
   if (bountyMatch) return { view: 'bounty', slug: decodeURIComponent(bountyMatch[1]) };
   if (profileMatch) return { view: 'profile', handle: decodeURIComponent(profileMatch[1]) };
   return { view: 'board' };
@@ -48,11 +50,12 @@ async function render() {
       document.title = `${b.title} | make.fun bounties`;
       app.innerHTML = bounty(b);
     } else if (r.view === 'leaderboard') {
-      const lb = await getLeaderboard(r.slug);
+      // Fetch and chunk load are independent: run them together, not one after the other.
+      const [lb, { leaderboard }] = await Promise.all([getLeaderboard(r.slug), import('./views-extra.js')]);
       document.title = `${lb.competition?.title ?? r.slug} leaderboard | make.fun bounties`;
       app.innerHTML = leaderboard(lb, state.shown);
     } else {
-      const p = await getProfile(r.handle);
+      const [p, { profile }] = await Promise.all([getProfile(r.handle), import('./views-extra.js')]);
       document.title = `@${p.handle} | make.fun bounties`;
       app.innerHTML = profile(p);
     }
